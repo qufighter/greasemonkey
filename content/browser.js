@@ -306,6 +306,12 @@ GM_BrowserUI.installScript = function(script){
  * User Script Commands submenu.
  */
 GM_BrowserUI.onLocationChange = function(a,b,c) {
+
+// the following ALMOST works as the total implmementation of listeners,
+// this fails completely on session restore to catch background tabs,
+// and generall fails to catch anything that is not in the foreground
+//  if (!a.document.body) GM_BrowserUI.tabLocationChange(a.DOMWindow);
+
   if (this.currentMenuCommander != null) {
     this.currentMenuCommander.detach();
     this.currentMenuCommander = null;
