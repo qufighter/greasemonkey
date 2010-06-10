@@ -126,7 +126,7 @@ var greasemonkeyService = {
   domContentLoaded: function(wrappedContentWin, chromeWin) {
     this.prepareScripts('loaded', wrappedContentWin, chromeWin);
   },
-  
+
   prepareScripts: function (event, wrappedContentWin, chromeWin) {
     var url = wrappedContentWin.document.location.href;
     var scripts = this.initScripts(url, wrappedContentWin, chromeWin, event);
