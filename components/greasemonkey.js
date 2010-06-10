@@ -119,6 +119,14 @@ var greasemonkeyService = {
     throw new Error("Browser window is not registered.");
   },
 
+  documentStart: function(wrappedContentWin, chromeWin) {
+    this.prepareScripts('start', wrappedContentWin, chromeWin);
+  },
+
+  domContentLoaded: function(wrappedContentWin, chromeWin) {
+    this.prepareScripts('loaded', wrappedContentWin, chromeWin);
+  },
+  
   prepareScripts: function (event, wrappedContentWin, chromeWin) {
     var url = wrappedContentWin.document.location.href;
     var scripts = this.initScripts(url, wrappedContentWin, chromeWin, event);
@@ -126,14 +134,6 @@ var greasemonkeyService = {
     if (scripts.length > 0) {
       this.injectScripts(scripts, url, wrappedContentWin, chromeWin);
     }
-  },
-
-  documentStart: function(wrappedContentWin, chromeWin) {
-    this.prepareScripts('start', wrappedContentWin, chromeWin);
-  },
-
-  domContentLoaded: function(wrappedContentWin, chromeWin) {
-    this.prepareScripts('loaded', wrappedContentWin, chromeWin);
   },
 
   startup: function() {
