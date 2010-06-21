@@ -287,8 +287,8 @@ Config.prototype = {
           case "version":
             script["_" + header] = value;
             break;
-          case "run_at":
-            if (value=="document_start") script._earlyInject = true;
+          case "run-at":
+            if (value=="document-start") script._earlyInject = true;
             break;
           case "include":
             script._includes.push(value);
