@@ -46,7 +46,7 @@ Script.prototype = {
   get id() {
     if (!this._id) {
       this._id = this._basedirFile.leafName;
-      if (this._basedir == '.') this._id += "/" + this._filename;
+      if (this._id.indexOf(".") == 0) this._id += "/" + this._filename;
     }
     return this._id;
   },
