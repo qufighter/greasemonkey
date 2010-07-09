@@ -44,9 +44,10 @@ Script.prototype = {
   get name() { return this._name; },
   get namespace() { return this._namespace; },
   get id() {
-    if (!this._id) this._id = this._basedir != '.' ?
-                              this._basedir :
-                              this._namespace + "/" + this._name;
+    if (!this._id) {
+      this._id = this._basedirFile.leafName;
+      if (this._basedir == '.') this._id += "/" + this._filename;
+    }
     return this._id;
   },
   get prefroot() { 
