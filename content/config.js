@@ -306,6 +306,65 @@ Config.prototype = {
     return script;
   },
 
+  unparse: function(script) {
+    //this function takes the scripts current metadata and writes it to the script file
+    var source = script.textContent;
+    var newSource = [];
+
+    var lines = source.match(/.+/g);
+    var lnIdx = 0;
+    var result = {};
+    var foundMeta = false;
+
+    while ((result = lines[lnIdx++])) {
+      if (result.indexOf("// ==UserScript==") == 0) {
+      	newSource.push(result);
+        foundMeta = true;
+        break;
+      }
+    }
+
+    // gather up meta lines
+    if (foundMeta) {
+      while ((result = lines[lnIdx++])) {
+        if (result.indexOf("// ==/UserScript==") == 0) {
+        	newSource.push(result);
+          break;
+        }
+
+        var match = result.match(/\/\/ \@(\S+)(?:\s+([^\n]+))?/);
+        if (match === null) continue;
+
+        var header = match[1];
+        var value = match[2];
+
+        switch (header) {
+          case "name":
+            newSource.push("// @name           " + script.name);
+            break;
+          case "namespace":
+            newSource.push("// @namespace      " + script.namespace);
+            break;
+          default:
+            newSource.push(result);
+            break;
+        }
+      }
+    }
+
+    while ((result = lines[lnIdx++])) {
+    	newSource.push(result);
+    }
+
+    var ending = "\n";
+    if (window.navigator.platform.match(/^Win/)) ending = "\r\n";
+    newSource = newSource.join(ending);
+
+    var ws = GM_getWriteStream(script.file);
+    ws.write(newSource, newSource.length);
+    ws.close();
+  },
+
   install: function(script) {
     GM_log("> Config.install");
 
