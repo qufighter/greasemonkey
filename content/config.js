@@ -337,7 +337,7 @@ Config.prototype = {
     var foundMeta = false;
 
     // gather lines before metablock
-    while ((result = lines[lnIdx++])) {
+    while ((result = lines[lnIdx++])!==undefined) {
       if (result.indexOf("// ==UserScript==") == 0) {
         newSource.push(result);// begin metadata block
         foundMeta = true;
@@ -348,7 +348,7 @@ Config.prototype = {
 
     // gather up meta lines
     if (foundMeta) {
-      while ((result = lines[lnIdx++])) {
+      while ((result = lines[lnIdx++])!==undefined) {
         if (result.indexOf("// ==/UserScript==") == 0) {
 
           // ensure metadata written contains name and namespace
@@ -382,7 +382,7 @@ Config.prototype = {
     }
 
     // write remaining script contents
-    while ((result = lines[lnIdx++])) {
+    while ((result = lines[lnIdx++])!==undefined) {
       newSource.push(result);
     }
 
