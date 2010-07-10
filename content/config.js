@@ -503,6 +503,7 @@ Config.prototype = {
     var scripts = this.getMatchingScripts(
         function (script) { return script.isModified(); });
     if (0 == scripts.length) return;
+
     for (var i = 0, script; script = scripts[i]; i++) {
       var parsedScript = this.parse(
           script.textContent, script._downloadURL, true);
