@@ -310,7 +310,6 @@ Config.prototype = {
     //this function takes the scripts current metadata and writes it to the script file
     var source = script.textContent;
     var newSource = [];
-
     var lines = source.match(/.+/g);
     var lnIdx = 0;
     var result = {};
@@ -322,6 +321,7 @@ Config.prototype = {
         foundMeta = true;
         break;
       }
+      newSource.push(result);
     }
 
     // gather up meta lines
@@ -347,7 +347,6 @@ Config.prototype = {
             break;
           default:
             newSource.push(result);
-            break;
         }
       }
     }
@@ -470,6 +469,7 @@ Config.prototype = {
     for (var i = 0, script; script = scripts[i]; i++) {
       var parsedScript = this.parse(
           script.textContent, script._downloadURL, true);
+      //this._find(parsedScript)
       script.updateFromNewScript(parsedScript);
       this._changed(script, "modified", null, true);
     }
