@@ -62,13 +62,12 @@ Config.prototype = {
   _findDuplicates: function(newScript, origionalScript) {
     var namespace = newScript._namespace.toLowerCase();
     var name = newScript._name.toLowerCase();
-    var file = origionalScript.file;
     var duplicates = [];
 
     for (var i = 0, script; script = this._scripts[i]; i++) {
       if (script._namespace.toLowerCase() == namespace
         && script._name.toLowerCase() == name
-        && !script.file.equals(file)) {
+        && !script.file.equals(origionalScript.file)) {
         duplicates.push(i);
       }
     }
