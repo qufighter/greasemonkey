@@ -315,9 +315,10 @@ Config.prototype = {
     var result = {};
     var foundMeta = false;
 
+    //gather lines before metablock
     while ((result = lines[lnIdx++])) {
       if (result.indexOf("// ==UserScript==") == 0) {
-      	newSource.push(result);
+        newSource.push(result);
         foundMeta = true;
         break;
       }
@@ -328,7 +329,7 @@ Config.prototype = {
     if (foundMeta) {
       while ((result = lines[lnIdx++])) {
         if (result.indexOf("// ==/UserScript==") == 0) {
-        	newSource.push(result);
+          newSource.push(result);
           break;
         }
 
@@ -351,8 +352,9 @@ Config.prototype = {
       }
     }
 
+    //write remaining script contents
     while ((result = lines[lnIdx++])) {
-    	newSource.push(result);
+      newSource.push(result);
     }
 
     var ending = "\n";
