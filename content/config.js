@@ -59,14 +59,15 @@ Config.prototype = {
     return -1;
   },
 
-  _findDuplicates: function(aScript) {
-    var namespace = aScript._namespace.toLowerCase();
-    var name = aScript._name.toLowerCase();
+  _findDuplicates: function(newScript, origionalScript) {
+    var namespace = newScript._namespace.toLowerCase();
+    var name = newScript._name.toLowerCase();
     var duplicates = [];
 
     for (var i = 0, script; script = this._scripts[i]; i++) {
       if (script._namespace.toLowerCase() == namespace
-        && script._name.toLowerCase() == name) {
+        && script._name.toLowerCase() == name
+        && !script.file.equals(origionalScript.file)) {
         duplicates.push(i);
       }
     }
@@ -330,7 +331,7 @@ Config.prototype = {
     var source = script.textContent;
     var newSource = [];
     var metaDataFound = {};
-    var lines = source.match(/.+/g);
+    var lines = source.split("\n");
     var lnIdx = 0;
     var result = {};
     var foundMeta = false;
@@ -386,7 +387,14 @@ Config.prototype = {
     }
 
     var ending = "\n";
-    if (window.navigator.platform.match(/^Win/)) ending = "\r\n";
+    var windowManager = Components
+         .classes['@mozilla.org/appshell/window-mediator;1']
+         .getService(Components.interfaces.nsIWindowMediator);
+    var chromeWin = windowManager.getMostRecentWindow("navigator:browser");
+    if (chromeWin.gBrowser) {
+      window = chromeWin.gBrowser.selectedBrowser.contentWindow;
+      if (window.navigator.platform.match(/^Win/)) ending = "\r\n";
+    }
     newSource = newSource.join(ending);
 
     var ws = GM_getWriteStream(script.file);
@@ -495,11 +503,10 @@ Config.prototype = {
     var scripts = this.getMatchingScripts(
         function (script) { return script.isModified(); });
     if (0 == scripts.length) return;
-
     for (var i = 0, script; script = scripts[i]; i++) {
       var parsedScript = this.parse(
           script.textContent, script._downloadURL, true);
-      if (this._findDuplicates(parsedScript).length > 1){
+      if (this._findDuplicates(parsedScript, script).length > 0){
         GM_log("The name and namespace you specified were in conflict", true);
         this.unparse(script);//revert name and namespace in script file
         parsedScript = this.parse(
