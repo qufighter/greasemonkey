@@ -59,6 +59,21 @@ Config.prototype = {
     return -1;
   },
 
+  _findDuplicates: function(aScript) {
+    var namespace = aScript._namespace.toLowerCase();
+    var name = aScript._name.toLowerCase();
+    var duplicates = [];
+
+    for (var i = 0, script; script = this._scripts[i]; i++) {
+      if (script._namespace.toLowerCase() == namespace
+        && script._name.toLowerCase() == name) {
+        duplicates.push(i);
+      }
+    }
+
+    return duplicates;
+  },
+
   _load: function() {
     var domParser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
         .createInstance(Components.interfaces.nsIDOMParser);
@@ -306,19 +321,24 @@ Config.prototype = {
     return script;
   },
 
+  /**
+   * Remove problem metadata from a script file by writing the previous values.
+   *
+   * @param script The script whose modified metadata is in conflict.
+   */
   unparse: function(script) {
-    //this function takes the scripts current metadata and writes it to the script file
     var source = script.textContent;
     var newSource = [];
+    var metaDataFound = {};
     var lines = source.match(/.+/g);
     var lnIdx = 0;
     var result = {};
     var foundMeta = false;
 
-    //gather lines before metablock
+    // gather lines before metablock
     while ((result = lines[lnIdx++])) {
       if (result.indexOf("// ==UserScript==") == 0) {
-        newSource.push(result);
+        newSource.push(result);// begin metadata block
         foundMeta = true;
         break;
       }
@@ -329,7 +349,14 @@ Config.prototype = {
     if (foundMeta) {
       while ((result = lines[lnIdx++])) {
         if (result.indexOf("// ==/UserScript==") == 0) {
-          newSource.push(result);
+
+          // ensure metadata written contains name and namespace
+          if (!metaDataFound["name"])
+            newSource.push("// @name           " + script.name);
+          if (!metaDataFound["namespace"])
+            newSource.push("// @namespace      " + script.namespace);
+
+          newSource.push(result);// end of metadata block
           break;
         }
 
@@ -338,6 +365,7 @@ Config.prototype = {
 
         var header = match[1];
         var value = match[2];
+        metaDataFound[header]=true;
 
         switch (header) {
           case "name":
@@ -347,12 +375,12 @@ Config.prototype = {
             newSource.push("// @namespace      " + script.namespace);
             break;
           default:
-            newSource.push(result);
+            newSource.push(result);// append all other metadata encountered
         }
       }
     }
 
-    //write remaining script contents
+    // write remaining script contents
     while ((result = lines[lnIdx++])) {
       newSource.push(result);
     }
@@ -471,7 +499,12 @@ Config.prototype = {
     for (var i = 0, script; script = scripts[i]; i++) {
       var parsedScript = this.parse(
           script.textContent, script._downloadURL, true);
-      //this._find(parsedScript)
+      if (this._findDuplicates(parsedScript).length > 1){
+        GM_log("The name and namespace you specified were in conflict", true);
+        this.unparse(script);//revert name and namespace in script file
+        parsedScript = this.parse(
+          script.textContent, script._downloadURL, true);
+      }
       script.updateFromNewScript(parsedScript);
       this._changed(script, "modified", null, true);
     }
