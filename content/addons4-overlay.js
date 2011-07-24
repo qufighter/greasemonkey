@@ -127,6 +127,15 @@ function init() {
 
   document.getElementById('greasemonkey-sort-bar').addEventListener(
       'command', onSortersClicked, false);
+
+  // Make sure script list is sorted into run-at sections.
+  var GM_config = GM_getConfig();
+  function scriptCmp(a, b) {
+    return a._runAt < b._runAt ? 1 : -1;
+  }
+  GM_config._scripts.sort(scriptCmp);
+  GM_config._save();
+
   applySort();
 };
 

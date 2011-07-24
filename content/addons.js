@@ -83,6 +83,13 @@ var observer = {
 // Set event listeners.
 window.addEventListener('load', function() {
   gUserscriptsView = document.getElementById('userscriptsView');
+
+  function scriptCmp(a, b) {
+    return a._runAt < b._runAt ? 1 : -1;
+  }
+  GM_config._scripts.sort(scriptCmp);
+  GM_config._save();
+
   greasemonkeyAddons.fillList();
   greasemonkeyAddons.fixButtonOrder();
 
@@ -277,6 +284,10 @@ var greasemonkeyAddons = {
     case 'cmd_userscript_sort':
       function scriptCmp(a, b) {
         return a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1;
+      }
+      GM_config._scripts.sort(scriptCmp);
+      function scriptCmp(a, b) {
+        return a._runAt < b._runAt ? 1 : -1;
       }
       GM_config._scripts.sort(scriptCmp);
       GM_config._save();
