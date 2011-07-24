@@ -348,8 +348,7 @@ Config.prototype.move = function(script, destination) {
 // Make sure scripts stay in their _runAt zones
 // even when script is moving "to top" or "to bottom" of list
 // translate this into "to top" or "to bottom" of section instead.
-if (this._scripts[to]._runAt != this._scripts[from]._runAt
-) {
+if (this._scripts[to]._runAt != this._scripts[from]._runAt) {
   var fromRunAt = this._scripts[from]._runAt;
   var step = from < to ? -1 : 1;
   to += step;
