@@ -21,13 +21,16 @@ Hide native view/buttons, when user scripts view is open.
 }
 
 /* XBL Bindings */
-.userscripts richlistitem[opType="needs-uninstall"] hbox.addon-optype,
-.userscripts richlistitem[opType="needs-uninstall"] hbox.addon-description
+.userscripts .userscript[opType="needs-uninstall"] hbox.addon-optype,
+.userscripts .userscript[opType="needs-uninstall"] hbox.addon-description
 {
   -moz-binding: url("chrome://greasemonkey/content/addons.xml#addon-needs-uninstall");
 }
-.userscripts richlistitem[selected="true"] {
+.userscripts .userscript[selected="true"] {
   -moz-binding: url("chrome://greasemonkey/content/addons.xml#userscript-selected");
+}
+.userscripts .divider{
+  -moz-binding: url("chrome://greasemonkey/content/addons.xml#userscript-divider");
 }
 
 /* Appearance */
@@ -41,11 +44,14 @@ Hide native view/buttons, when user scripts view is open.
   min-width: 1px;
 }
 
-#userscriptsView:focus > richlistitem[selected="true"] {
+#userscriptsView:focus > .userscript[selected="true"] {
   background-image: url("chrome://mozapps/skin/extensions/itemEnabledFader.png");
   background-color: Highlight;
   color: HighlightText;
 }
-#userscriptsView:focus > richlistitem[selected="true"][isDisabled="true"] {
+#userscriptsView:focus > .userscript[selected="true"][isDisabled="true"] {
   background-image: url("chrome://mozapps/skin/extensions/itemDisabledFader.png");
+}
+.userscripts .divider{
+  background-color: #E0E0E0;
 }

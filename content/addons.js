@@ -68,8 +68,16 @@ var observer = {
         gUserscriptsView.removeChild(node);
         break;
       case "move":
-        gUserscriptsView.removeChild(node);
-        gUserscriptsView.insertBefore(node, gUserscriptsView.childNodes[data]);
+        for (var i in gUserscriptsView.childNodes){
+          if (gUserscriptsView.childNodes[i].className != 'divider') {
+            if (data == 0) {
+              gUserscriptsView.removeChild(node);
+              gUserscriptsView.insertBefore(node, gUserscriptsView.childNodes[i]);
+              break;
+            }
+            data--;
+          }
+        }
         greasemonkeyAddons.reselectLastSelected();
         break;
       case "modified":
@@ -185,6 +193,9 @@ var greasemonkeyAddons = {
 
     // Add a list item for each script.
     for (var i = 0, script = null; script = GM_config.scripts[i]; i++) {
+      var prevScript = GM_config.scripts[i-1];
+      if (!prevScript || script._runAt != prevScript._runAt)
+        greasemonkeyAddons.addDividerToList(script);
       greasemonkeyAddons.addScriptToList(script);
     }
 
@@ -222,16 +233,32 @@ var greasemonkeyAddons = {
     item.setAttribute('version', script.version);
     item.setAttribute('iconURL', script.icon.fileURL);
     item.setAttribute('id', 'urn:greasemonkey:item:'+script.id);
+    item.setAttribute('class', 'userscript');
     item.setAttribute('isDisabled', !script.enabled);
     if (script.id in GM_uninstallQueue) {
       item.setAttribute('opType', 'needs-uninstall');
     }
+    return item;
+  },
 
+  listdividerForScript: function(script) {
+    var item = document.createElement('richlistitem');
+
+    item.setAttribute('name', script._runAt);
+    item.setAttribute('description', "The scripts below run at " + script._runAt);
+    item.setAttribute('id', 'urn:greasemonkey:divider:'+script._runAt);
+    item.setAttribute('class', 'divider');
     return item;
   },
 
   addScriptToList: function(script, beforeNode) {
     var item = greasemonkeyAddons.listitemForScript(script);
+    gUserscriptsView.insertBefore(item, beforeNode || null);
+    return item;
+  },
+
+  addDividerToList: function(script, beforeNode) {
+    var item = greasemonkeyAddons.listdividerForScript(script);
     gUserscriptsView.insertBefore(item, beforeNode || null);
     return item;
   },
@@ -352,8 +379,8 @@ var greasemonkeyAddons = {
       setItemsHidden(false, standardItems);
       setItemsHidden(false, script.enabled ? ['disable'] : ['enable']);
       // Set disabled.
-      var atBottom = !selectedItem.nextSibling;
-      var atTop = !selectedItem.previousSibling;
+      var atBottom = !selectedItem.nextSibling || selectedItem.nextSibling.className == 'divider';
+      var atTop = !selectedItem.previousSibling || selectedItem.previousSibling.className == 'divider';
       // This setTimeout moves to after whatever black magic is removing
       // these values.
       // Todo: better fix.
