@@ -345,21 +345,21 @@ Config.prototype.move = function(script, destination) {
 
   if (to == -1) return;
 
-// Make sure scripts stay in their _runAt zones
-// even when script is moving "to top" or "to bottom" of list
-// translate this into "to top" or "to bottom" of section instead.
-if (this._scripts[to]._runAt != this._scripts[from]._runAt) {
-  var fromRunAt = this._scripts[from]._runAt;
-  var step = from < to ? -1 : 1;
-  to += step;
-  while (to != from) {
-    if (this._scripts[to]._runAt == fromRunAt)
-      break;
+  // Make sure scripts stay in their _runAt zones
+  // even when script is moving "to top" or "to bottom" of list
+  // translate this into "to top" or "to bottom" of section instead.
+  if (this._scripts[to]._runAt != this._scripts[from]._runAt) {
+    var fromRunAt = this._scripts[from]._runAt;
+    var step = from < to ? -1 : 1;
     to += step;
+    while (to != from) {
+      if (this._scripts[to]._runAt == fromRunAt)
+        break;
+      to += step;
+    }
   }
-}
 
-if (to == from) return;
+  if (to == from) return;
 
   var tmp = this._scripts.splice(from, 1)[0];
   this._scripts.splice(to, 0, tmp);
