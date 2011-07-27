@@ -344,6 +344,7 @@ var greasemonkeyAddons = {
       dump("greasemonkeyAddons.buildContextMenu() could not find selected script.\n");
       return false;
     }
+
     function $(id) { return document.getElementById(id); }
     function setItemsHidden(hidden, idList) {
       if (idList) {
