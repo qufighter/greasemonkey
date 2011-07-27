@@ -88,7 +88,7 @@
   </commandset>
 
   <menupopup id="userscriptContextMenu"
-    onpopupshowing="greasemonkeyAddons.buildContextMenu(event);"
+    onpopupshowing="return greasemonkeyAddons.buildContextMenu(event);"
   >
     <menuitem id="userscript_context_move_up" command="cmd_userscript_move_up"
       label="&MoveUp;" accesskey="&MoveUp.accesskey;"
