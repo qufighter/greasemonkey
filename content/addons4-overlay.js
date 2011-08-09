@@ -176,8 +176,42 @@ function applySort() {
   var list = document.getElementById('addon-list');
   var elements = Array.slice(list.childNodes, 0);
   sortElements(elements, sortBy, ascending);
-  while (list.listChild) list.removeChild(list.lastChild);
-  elements.forEach(function(el) { list.appendChild(el); });
+  while (list.lastChild) list.removeChild(list.lastChild);
+  if (!sortedByExecOrder()) {
+    elements.forEach(function(el) {
+      if (el.mAddon._script.id)
+        list.appendChild(el);
+    });
+  } else {
+    var lastscript=false;
+    elements.forEach(function(el) {
+      if (el.mAddon._script.id) {
+        var script = el.mAddon._script;
+        if (!lastscript || script._runAt != lastscript._runAt) {
+          var item = el.cloneNode(true);//no need to clone?
+          //item.setAttribute('name', script._runAt);
+          //item.setAttribute('description', "The scripts below run at " + script._runAt);
+          //item.setAttribute('id', 'urn:greasemonkey:divider:'+script._runAt);
+          item.setAttribute('class', 'addon addon-view');
+          item.setAttribute('style', 'background-color:#e3ebf4;');
+          list.appendChild(item);//no need to add twice?
+          item.mAddon = new el.mAddon.__proto__.constructor({
+            id:0,
+            name:script._runAt,
+            version:0,
+            description:"The scripts below run at " + script._runAt,
+            icon:{fileURL:0},
+            size:1,
+            updateDate:0
+          });
+          list.removeChild(item);
+          list.appendChild(item);
+        }
+        list.appendChild(el);
+        lastscript=script;
+      }
+    });
+  }
 };
 
 function onViewChanged(aEvent) {
