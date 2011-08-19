@@ -93,7 +93,9 @@ function GM_addStyle(doc, css) {
   var head = doc.getElementsByTagName("head")[0];
   if (head) {
     if (doc.gm_css_uri) {
-      // delete doc.gm_css_uri which prevents inf recursion
+      // If styles were added using style-sheet-service earlier delete the sheet
+      // and add those syles to the document's <head> the normal way.
+      // First, delete doc.gm_css_uri which prevents this block from recurring
       GM_clearStyleSheetServiceStyles(doc);
       GM_addStyle(doc, doc.gm_css_raw)
       delete doc.gm_css_raw;
@@ -109,21 +111,25 @@ function GM_addStyle(doc, css) {
     var ios = Components.classes["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService);
     var sss = Components.classes["@mozilla.org/content/style-sheet-service;1"].getService(Components.interfaces.nsIStyleSheetService);
 
+    // we must store the total CSS in the sheet so the sheet is a single block
+    // of CSS to manage, so that we only have to manage one sheet per document
     if (!doc.gm_css_raw) {
       doc.gm_css_raw = '';
     }else if (doc.gm_css_raw.substr(doc.gm_css_raw.length - 1) != ';') {
       doc.gm_css_raw += ";";
     }
     doc.gm_css_raw += css;
+
+    // build the CSS URI rule which will only apply for the document's URL
     css = "@-moz-document url(" + doc.location.href + ") {" + doc.gm_css_raw + "}";
     var cssURI = ios.newURI("data:text/css," + encodeURIComponent(css), null, null);
     sss.loadAndRegisterSheet(cssURI, sss.USER_SHEET);
 
-    //unload previous now redundant registered stylesheeet
+    //unload previous, now redundant, registered stylesheeet; if defined
     if (doc.gm_css_uri && sss.sheetRegistered(doc.gm_css_uri, sss.USER_SHEET)) {
      sss.unregisterSheet(doc.gm_css_uri, sss.USER_SHEET)
     }
-    doc.gm_css_uri = cssURI; // remember the sheet for removal later
+    doc.gm_css_uri = cssURI; // remember the sheet for removal next time
   }
   return style;
 }
