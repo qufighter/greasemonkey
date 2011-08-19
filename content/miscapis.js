@@ -90,37 +90,46 @@ GM_ScriptLogger.prototype.log = function(message) {
 // \\ // \\ // \\ // \\ // \\ // \\ // \\ // \\ // \\ // \\ // \\ // \\ // \\ //
 
 function GM_addStyle(doc, css) {
-  // based on stylish components\stylishStyle.js
-  var ios = Components.classes["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService);
-  var sss = Components.classes["@mozilla.org/content/style-sheet-service;1"].getService(Components.interfaces.nsIStyleSheetService);
-
-  if (!doc.gm_raw_css) doc.gm_raw_css = '';
-  doc.gm_raw_css += css;
-  css = "@-moz-document url(" + doc.location.href + ") {" + doc.gm_raw_css + "}";
-  var cssURI = ios.newURI("data:text/css," + encodeURIComponent(css), null, null);
-  sss.loadAndRegisterSheet(cssURI, sss.USER_SHEET);
-
-  //unload previous now redundant registered stylesheeet
-  if (doc.gm_css_uri && sss.sheetRegistered(doc.gm_css_uri, sss.USER_SHEET)) {
-   sss.unregisterSheet(doc.gm_css_uri, sss.USER_SHEET)
-  }
-  doc.gm_css_uri = cssURI;
-
   var head = doc.getElementsByTagName("head")[0];
   if (head) {
+    if (doc.gm_css_uri) {
+      GM_clearStyles(doc); // delets doc.gm_css_uri which prevents inf recursion
+      GM_addStyle(doc, doc.gm_raw_css)
+      delete doc.gm_raw_css;
+    }
     var style = doc.createElement("style");
     style.textContent = css;
     style.type = "text/css";
-    //head.appendChild(style);
+    head.appendChild(style);
+  } else {
+    // during document-start early injection while <head> is unavailable
+    // based on stylish components\stylishStyle.js
+    var ios = Components.classes["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService);
+    var sss = Components.classes["@mozilla.org/content/style-sheet-service;1"].getService(Components.interfaces.nsIStyleSheetService);
+   
+    if (!doc.gm_raw_css) doc.gm_raw_css = '';
+    doc.gm_raw_css += css;
+    css = "@-moz-document url(" + doc.location.href + ") {" + doc.gm_raw_css + "}";
+    var cssURI = ios.newURI("data:text/css," + encodeURIComponent(css), null, null);
+    sss.loadAndRegisterSheet(cssURI, sss.USER_SHEET);
+   
+    //unload previous now redundant registered stylesheeet
+    if (doc.gm_css_uri && sss.sheetRegistered(doc.gm_css_uri, sss.USER_SHEET)) {
+     sss.unregisterSheet(doc.gm_css_uri, sss.USER_SHEET)
+    }
+    doc.gm_css_uri = cssURI;
   }
   return style;
 }
 
 function GM_clearStyles(doc) {
-  GM_log("CLEAR STYLES",true);//this must be called when the document unloads to clean up
+  // this must be called when the document unloads to clean up, 
+  // it is called by the first GM_addStyle call that detects <head> 
+  var sss = Components.classes["@mozilla.org/content/style-sheet-service;1"].getService(Components.interfaces.nsIStyleSheetService);
   if (doc.gm_css_uri && sss.sheetRegistered(doc.gm_css_uri, sss.USER_SHEET)) {
    sss.unregisterSheet(doc.gm_css_uri, sss.USER_SHEET)
   }
+  delete doc.gm_css_uri;
 }
 
 // \\ // \\ // \\ // \\ // \\ // \\ // \\ // \\ // \\ // \\ // \\ // \\ // \\ //
