@@ -107,7 +107,11 @@ function GM_addStyle(doc, css) {
     var ios = Components.classes["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService);
     var sss = Components.classes["@mozilla.org/content/style-sheet-service;1"].getService(Components.interfaces.nsIStyleSheetService);
    
-    if (!doc.gm_raw_css) doc.gm_raw_css = '';
+    if (!doc.gm_raw_css) {
+      doc.gm_raw_css = '';
+    }else if (doc.gm_raw_css.substr(doc.gm_raw_css.length - 1) != ';') {
+      doc.gm_raw_css += ";";
+    }
     doc.gm_raw_css += css;
     css = "@-moz-document url(" + doc.location.href + ") {" + doc.gm_raw_css + "}";
     var cssURI = ios.newURI("data:text/css," + encodeURIComponent(css), null, null);
